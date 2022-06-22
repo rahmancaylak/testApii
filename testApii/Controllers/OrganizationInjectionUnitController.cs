@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using testApii.Auth.Authorization;
 using testApii.DAL;
 using testApii.DAL.Interfaces;
 using testApii.Entity;
@@ -7,6 +8,7 @@ using testApii.Entity.API;
 
 namespace testApii.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class OrganizationInjectionUnitController : ControllerBase

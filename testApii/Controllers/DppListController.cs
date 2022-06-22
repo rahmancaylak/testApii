@@ -1,53 +1,57 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using testApii.Auth.Authorization;
 using testApii.DAL;
 using testApii.Entity;
 using testApii.Entity.API;
 
-namespace TodoApi.Controllers;
-[ApiController]
-[Route("api/[controller]")]
-public class DppListController : ControllerBase
+namespace TodoApi.Controllers
 {
-    private readonly TestDbContext _context;
-    private readonly IHelpers _helpers;
-    public DppListController(TestDbContext context, IHelpers helpers)
+    [Authorize]
+    [ApiController]
+    [Route("api/[controller]")]
+    public class DppListController : ControllerBase
     {
-        _context = context;
-        _helpers = helpers;
-    }
-
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<SantralValue>>> GetDppList(string uevcbEIC, DateTime startDate, DateTime endDate)
-    {
-        var injectionUnits = await _context.InjectionUnits.ToListAsync();
-        var injectionUnit = injectionUnits.Where(e => e.EIC == uevcbEIC).FirstOrDefault();
-
-        #region ParametersErrorControl
-        if (injectionUnit == null)
+        private readonly TestDbContext _context;
+        private readonly IHelpers _helpers;
+        public DppListController(TestDbContext context, IHelpers helpers)
         {
-            return NotFound(new { message = $"Injection Unit doesn't find!" });
+            _context = context;
+            _helpers = helpers;
         }
 
-        if (startDate > endDate)
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<SantralValue>>> GetDppList(string uevcbEIC, DateTime startDate, DateTime endDate)
         {
-            return NotFound(new { message = "Start date can't be greater than end date!" });
-        }
+            var injectionUnits = await _context.InjectionUnits.ToListAsync();
+            var injectionUnit = injectionUnits.Where(e => e.EIC == uevcbEIC).FirstOrDefault();
 
-        if (endDate > DateTime.Now)
-        {
-            return NotFound(new { message = "End date can't be greater than today!" });
-        }
-        #endregion
+            #region ParametersErrorControl
+            if (injectionUnit == null)
+            {
+                return NotFound(new { message = $"Injection Unit doesn't find!" });
+            }
 
-        string parameters = $"?endDate={endDate:yyyy-MM-dd}&organizationEIC={injectionUnit.OrganizationETSOCode}&startDate={startDate:yyyy-MM-dd}&uevcbEIC={injectionUnit.EIC}";
-        string dppListJSONString = _helpers.CallAPI("Kgup", parameters);
-        var response = _helpers.Deserialize<Response<SantralValue>>(dppListJSONString);
+            if (startDate > endDate)
+            {
+                return NotFound(new { message = "Start date can't be greater than end date!" });
+            }
 
-        if (response.Body == null)
-        {
-            return NotFound();
+            if (endDate > DateTime.Now)
+            {
+                return NotFound(new { message = "End date can't be greater than today!" });
+            }
+            #endregion
+
+            string parameters = $"?endDate={endDate:yyyy-MM-dd}&organizationEIC={injectionUnit.OrganizationETSOCode}&startDate={startDate:yyyy-MM-dd}&uevcbEIC={injectionUnit.EIC}";
+            string dppListJSONString = _helpers.CallAPI("Kgup", parameters);
+            var response = _helpers.Deserialize<Response<SantralValue>>(dppListJSONString);
+
+            if (response.Body == null)
+            {
+                return NotFound();
+            }
+            return response.Body.dppList.ToList();
         }
-        return response.Body.dppList.ToList();
     }
 }
