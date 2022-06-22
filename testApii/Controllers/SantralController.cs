@@ -1,11 +1,13 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using testApii.Auth.Authorization;
 using testApii.DAL;
 using testApii.DAL.Concreate.Interfaces;
 using testApii.Entity;
 
 namespace testApii.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class SantralController : ControllerBase
