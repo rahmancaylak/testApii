@@ -1,6 +1,5 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using testApii.Entity;
@@ -41,12 +40,12 @@ namespace testApii.DAL
             dict.Add("Kgup", "/dpp");
             return dict[key];
         }
-        public (List<SantralValue> santralValue, string santralTipi) GetSantralValues(string parameters = "", string calculateType = "")
+        public (List<SantralValuesResponse> santralValue, string santralTipi) GetSantralValues(string parameters = "", string calculateType = "")
         {
             string jsonString = CallAPI(calculateType, parameters);
             var response = Deserialize<Response<SantralValue>>(jsonString);
             string apiSantralTipi = "";
-            List<SantralValue> list = new List<SantralValue>();
+            List<SantralValuesResponse> list = new List<SantralValuesResponse>();
             if (calculateType.ToLower() == "eak")
             {
                 foreach (var aic in response.Body.aicList)
@@ -63,7 +62,7 @@ namespace testApii.DAL
                             }
                         }
                     }
-                    list.Add(new SantralValue()
+                    list.Add(new SantralValuesResponse()
                     {
                         tarih = aic.tarih,
                         Toplam = aic.Toplam
@@ -89,7 +88,7 @@ namespace testApii.DAL
                             }
                         }
                     }
-                    list.Add(new SantralValue()
+                    list.Add(new SantralValuesResponse()
                     {
                         tarih = dpp.tarih,
                         Toplam = dpp.Toplam,

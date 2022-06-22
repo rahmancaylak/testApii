@@ -21,7 +21,7 @@ namespace testApii.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<Santral>>> GetSantral(string uevcbEIC, DateTime startDate, DateTime endDate)
+        public async Task<ActionResult<Santral>> GetSantral(string uevcbEIC, DateTime startDate, DateTime endDate)
         {
             var injectionUnits = await _context.InjectionUnits.ToListAsync();
             var injectionUnit = injectionUnits.Where(e => e.EIC == uevcbEIC).FirstOrDefault();
@@ -44,9 +44,29 @@ namespace testApii.Controllers
             #endregion
 
             string parameters = $"?endDate={endDate:yyyy-MM-dd}&organizationEIC={injectionUnit.OrganizationETSOCode}&startDate={startDate:yyyy-MM-dd}&uevcbEIC={injectionUnit.EIC}";
-            await _santralRepository.AddSantral(injectionUnit, parameters);
-            var santrals = _context.Santrals.ToList();
-            return santrals;
+
+            var santral = _context.Santrals.Where(e => e.Eic == uevcbEIC).FirstOrDefault();
+
+            if (santral == null)
+            {
+                await _santralRepository.AddSantral(injectionUnit, parameters);
+                santral = _context.Santrals.Where(e => e.Eic == uevcbEIC).FirstOrDefault();
+                return santral;
+            }
+            if (((int)santral.SantralTipi) == 0)
+            {
+                await _santralRepository.UpdateSantral(santral, injectionUnit, parameters);
+            }
+
+            var eak = _helpers.GetSantralValues(parameters, "Eak");
+            var kgup = _helpers.GetSantralValues(parameters, "Kgup");
+
+            Dictionary<string, List<SantralValuesResponse>> ValueList = new Dictionary<string, List<SantralValuesResponse>>();
+            ValueList.Add("Eak", eak.santralValue);
+            ValueList.Add("Kgup", kgup.santralValue);
+
+            santral.ValueList = ValueList;
+            return santral;
         }
     }
 }

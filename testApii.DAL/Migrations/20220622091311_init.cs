@@ -14,7 +14,7 @@ namespace testApii.DAL.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UnitId = table.Column<int>(type: "int", nullable: false),
+                    UnitId = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     EIC = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     OrganizationETSOCode = table.Column<string>(type: "nvarchar(max)", nullable: true)
@@ -42,6 +42,23 @@ namespace testApii.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Santrals",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    UnitId = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Eic = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UnitName = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    OrganizationETSOCode = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SantralTipi = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Santrals", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Users",
                 columns: table => new
                 {
@@ -65,6 +82,9 @@ namespace testApii.DAL.Migrations
 
             migrationBuilder.DropTable(
                 name: "Organizations");
+
+            migrationBuilder.DropTable(
+                name: "Santrals");
 
             migrationBuilder.DropTable(
                 name: "Users");

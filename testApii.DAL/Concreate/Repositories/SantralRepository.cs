@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,12 +21,12 @@ namespace testApii.DAL.Concreate.Repositories
             var eak = _helpers.GetSantralValues(parameters, "Eak");
             var kgup = _helpers.GetSantralValues(parameters, "Kgup");
 
-            Dictionary<string, List<SantralValue>> ValueList = new Dictionary<string, List<SantralValue>>();
+            Dictionary<string, List<SantralValuesResponse>> ValueList = new Dictionary<string, List<SantralValuesResponse>>();
             ValueList.Add("Eak", eak.santralValue);
             ValueList.Add("Kgup", kgup.santralValue);
 
             var apiSantralTipi = eak.santralTipi;
-            var santralTipi = Enum.TryParse(typeof(SantralTipi), apiSantralTipi, out var santralTipiValue);
+            Enum.TryParse(typeof(SantralTipi), apiSantralTipi, out var santralTipiValue);
 
             if (santralTipiValue == null)
             {
@@ -35,7 +34,6 @@ namespace testApii.DAL.Concreate.Repositories
             }
 
             List<Santral> santralList = new List<Santral>();
-            
             #region AddSantralList
             santralList.Add(new Santral()
             {
@@ -50,5 +48,20 @@ namespace testApii.DAL.Concreate.Repositories
             await AddRangeAsync(santralList);
             await _context.SaveChangesAsync();
         }
+        public async Task UpdateSantral(Santral santral, InjectionUnit injectionUnit, string parameters)
+        {
+            var eak = _helpers.GetSantralValues(parameters, "Eak");
+            var apiSantralTipi = eak.santralTipi;
+            Enum.TryParse(typeof(SantralTipi), apiSantralTipi, out var santralTipiValue);
+
+            if (santralTipiValue == null)
+            {
+                santralTipiValue = SantralTipi.Unknown;
+            }
+
+            santral.SantralTipi = (SantralTipi)santralTipiValue;
+            _context.SaveChanges();
+        }
+
     }
 }

@@ -1,10 +1,6 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections;
-using System.Collections.Generic;
+﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -20,12 +16,7 @@ namespace testApii.Entity
         public string OrganizationETSOCode { get; set; }
         public SantralTipi SantralTipi { get; set; }
         [NotMapped]
-        public Dictionary<string, List<SantralValue>> ValueList { get; set; }
-        public string ValueListJson
-        {
-            get => JsonConvert.SerializeObject(ValueList);
-            set => ValueList = JsonConvert.DeserializeObject<Dictionary<string, List<SantralValue>>>(value);
-        }
+        public Dictionary<string, List<SantralValuesResponse>> ValueList { get; set; }
     }
 
     public enum SantralTipi

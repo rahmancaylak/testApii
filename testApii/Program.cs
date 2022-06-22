@@ -19,7 +19,7 @@ builder.Services.AddCors();
 
 //Context
 builder.Services.AddDbContext<TestDbContext>(optionsBuilder =>
-optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("defaultConnection"),
+optionsBuilder.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"),
 optionsBuilder => optionsBuilder.MigrationsAssembly(typeof(TestDbContext).Assembly.FullName)));
 
 // configure automapper with all automapper profiles from this assembly
