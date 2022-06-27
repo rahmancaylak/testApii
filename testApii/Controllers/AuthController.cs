@@ -42,6 +42,19 @@ namespace testApii.Controllers
             return Ok(response);
         }
 
+        [HttpGet("user")]
+        public IActionResult User()
+        {
+            var jwt = Request.Cookies["jwt"];
+            var userId = _jwtUtils.ValidateToken(jwt);
+            if (userId == null)
+            {
+                return NotFound(new { message = "User didn't find" });
+            }
+            var user = _userRepository.GetById(userId.Value);
+            return Ok(user);
+        }
+
         [HttpGet("logout")]
         public IActionResult Logout()
         {
