@@ -21,27 +21,38 @@ namespace TodoApi.Controllers
         }
 
         [HttpGet]
-        public async Task<ActionResult<List<SantralValue>>> GetAicList(string uevcbEIC, DateTime startDate, DateTime endDate)
+        public async Task<ActionResult<IEnumerable<SantralValue>>> GetAicList(string uevcbEIC, DateTime startDate, DateTime endDate)
         {
             var injectionUnits = await _context.InjectionUnits.ToListAsync();
             var injectionUnit = injectionUnits.Where(e => e.EIC == uevcbEIC).FirstOrDefault();
 
+            string message = "";
+
             #region ParametersErrorControl
             if (injectionUnit == null)
             {
-                return NotFound(new { message = "Injection Unit doesn't find!" });
+                message = "Injection Unit doesn't find!";
             }
 
             if (startDate > endDate)
             {
-                return NotFound(new { message = "Start date can't be greater than end date!" });
+                message = "Start date can't be bigger than end date!";
             }
 
             if (endDate > DateTime.Now)
             {
-                return NotFound(new { message = "End date can't be greater than today!" });
+                message = "End date can't be bigger than today!";
             }
             #endregion
+
+            if (message.Length > 0)
+            {
+                return NotFound(new Response<SantralValue>()
+                {
+                    ResultCode = "404",
+                    ResultDescription = message
+                });
+            }
 
             string parameters = $"?endDate={endDate:yyyy-MM-dd}&organizationEIC={injectionUnit.OrganizationETSOCode}&startDate={startDate:yyyy-MM-dd}&uevcbEIC={injectionUnit.EIC}";
             string aicListJSONString = _helpers.CallAPI("Eak", parameters);
@@ -49,10 +60,19 @@ namespace TodoApi.Controllers
 
             if (response.Body == null)
             {
-                return NotFound();
+                return NotFound(new Response<SantralValue>()
+                {
+                    ResultCode = "404",
+                    ResultDescription = "Eak doesn't find!"
+                });
             }
 
-            return response.Body.aicList.ToList();
+            return Ok(new Response<SantralValue>()
+            {
+                ResultDescription = "Success",
+                ResultCode = "200",
+                Values = response.Body.aicList.ToList()
+            });
         }
     }
 }

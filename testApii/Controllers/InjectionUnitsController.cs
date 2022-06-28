@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using testApii.Auth.Authorization;
 using testApii.DAL;
 using testApii.Entity;
-using testApii.Auth.Authorization;
 using testApii.Entity.API;
 
 namespace testApii.Controllers
@@ -12,35 +12,36 @@ namespace testApii.Controllers
     [Authorize]
     [Route("api/[controller]")]
     [ApiController]
-    public class OrganizationsController : ControllerBase
+    public class InjectionUnitsController : ControllerBase
     {
         private readonly TestDbContext _context;
 
-        public OrganizationsController(TestDbContext context)
+        public InjectionUnitsController(TestDbContext context)
         {
             _context = context;
         }
 
-        // GET: api/Organizations
+        // GET: api/InjectionUnits
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Organization>>> GetOrganizations()
+        public async Task<ActionResult<IEnumerable<InjectionUnit>>> GetInjectionUnitNames()
         {
-            var organizations = await _context.Organizations.ToListAsync();
 
-            if (organizations == null)
+            var injectionUnits = await _context.InjectionUnits.ToListAsync();
+
+            if (injectionUnits == null)
             {
-                return NotFound(new Response<Organization>()
+                return NotFound(new Response<InjectionUnit>()
                 {
                     ResultCode = "404",
-                    ResultDescription = "Organizations didn't find!",
+                    ResultDescription = "Injection Units didn't find!",
                 });
             }
 
-            return Ok(new Response<Organization>()
+            return Ok(new Response<InjectionUnit>()
             {
                 ResultCode = "200",
                 ResultDescription = "Success",
-                Values = organizations,
+                Values = injectionUnits,
             });
         }
     }
