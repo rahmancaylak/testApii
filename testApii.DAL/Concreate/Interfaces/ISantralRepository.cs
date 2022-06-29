@@ -10,7 +10,7 @@ namespace testApii.DAL.Concreate.Interfaces
 {
     public interface ISantralRepository : IGenericRepository<Santral>
     {
-        public async Task AddSantral(InjectionUnit injectionUnit, string parameters) { }
+        public Task<List<Santral>> AddSantral(InjectionUnit injectionUnit, string parameters);
         public async Task UpdateSantral(Santral santral, InjectionUnit injectionUnit, string parameters) { }
     }
 }

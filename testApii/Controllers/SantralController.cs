@@ -4,6 +4,7 @@ using testApii.Auth.Authorization;
 using testApii.DAL;
 using testApii.DAL.Concreate.Interfaces;
 using testApii.Entity;
+using testApii.Entity.API;
 
 namespace testApii.Controllers
 {
@@ -27,48 +28,52 @@ namespace testApii.Controllers
         {
             var injectionUnits = await _context.InjectionUnits.ToListAsync();
             var injectionUnit = injectionUnits.Where(e => e.EIC == uevcbEIC).FirstOrDefault();
+            string message = "";
 
             #region ParametersErrorControl
             if (injectionUnit == null)
             {
-                return NotFound(new { message = "Injection Unit doesn't find!" });
+                message = "Injection Unit doesn't find!";
             }
 
             if (startDate > endDate)
             {
-                return NotFound(new { message = "Start date can't be bigger than end date!" });
+                message = "Start date can't be bigger than end date!";
             }
 
             if (endDate > DateTime.Now)
             {
-                return NotFound(new { message = "End date can't be bigger than today!" });
+                message = "End date can't be bigger than today!";
             }
             #endregion
 
+            if (message.Length > 0)
+            {
+                return NotFound(new Response<Santral>()
+                {
+                    ResultCode = "404",
+                    ResultDescription = message
+                });
+            }
+
             string parameters = $"?endDate={endDate:yyyy-MM-dd}&organizationEIC={injectionUnit.OrganizationETSOCode}&startDate={startDate:yyyy-MM-dd}&uevcbEIC={injectionUnit.EIC}";
+            var santral = _santralRepository.AddSantral(injectionUnit, parameters);
 
-            var santral = _context.Santrals.Where(e => e.Eic == uevcbEIC).FirstOrDefault();
-
-            if (santral == null)
+            if (santral.Result.Count <= 0)
             {
-                await _santralRepository.AddSantral(injectionUnit, parameters);
-                santral = _context.Santrals.Where(e => e.Eic == uevcbEIC).FirstOrDefault();
-                return santral;
-            }
-            if (((int)santral.SantralTipi) == 0)
-            {
-                await _santralRepository.UpdateSantral(santral, injectionUnit, parameters);
+                return NotFound(new Response<Santral>()
+                {
+                    ResultCode = "404",
+                    ResultDescription = "Santral didn't find!"
+                });
             }
 
-            var eak = _helpers.GetSantralValues(parameters, "Eak");
-            var kgup = _helpers.GetSantralValues(parameters, "Kgup");
-
-            Dictionary<string, List<SantralValuesResponse>> ValueList = new Dictionary<string, List<SantralValuesResponse>>();
-            ValueList.Add("Eak", eak.santralValue);
-            ValueList.Add("Kgup", kgup.santralValue);
-
-            santral.ValueList = ValueList;
-            return santral;
+            return Ok(new Response<Santral>()
+            {
+                ResultCode = "200",
+                ResultDescription = "Success",
+                Values = santral.Result
+            });
         }
     }
 }

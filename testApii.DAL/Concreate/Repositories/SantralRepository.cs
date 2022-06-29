@@ -16,8 +16,9 @@ namespace testApii.DAL.Concreate.Repositories
             _helpers = helpers;
         }
 
-        public async Task AddSantral(InjectionUnit injectionUnit, string parameters)
+        public async Task<List<Santral>> AddSantral(InjectionUnit injectionUnit, string parameters)
         {
+            var santral = _context.Santrals.Where(e => e.Eic == injectionUnit.EIC).FirstOrDefault();
             var eak = _helpers.GetSantralValues(parameters, "Eak");
             var kgup = _helpers.GetSantralValues(parameters, "Kgup");
 
@@ -34,34 +35,33 @@ namespace testApii.DAL.Concreate.Repositories
             }
 
             List<Santral> santralList = new List<Santral>();
-            #region AddSantralList
-            santralList.Add(new Santral()
-            {
-                UnitId = injectionUnit.UnitId,
-                Eic = injectionUnit.EIC,
-                UnitName = injectionUnit.Name,
-                OrganizationETSOCode = injectionUnit.OrganizationETSOCode,
-                SantralTipi = (SantralTipi)santralTipiValue,
-                ValueList = ValueList
-            });
-            #endregion
-            await AddRangeAsync(santralList);
-            await _context.SaveChangesAsync();
-        }
-        public async Task UpdateSantral(Santral santral, InjectionUnit injectionUnit, string parameters)
-        {
-            var eak = _helpers.GetSantralValues(parameters, "Eak");
-            var apiSantralTipi = eak.santralTipi;
-            Enum.TryParse(typeof(SantralTipi), apiSantralTipi, out var santralTipiValue);
 
-            if (santralTipiValue == null)
+            if (santral == null)
             {
-                santralTipiValue = SantralTipi.Unknown;
+                #region AddSantralList
+                santralList.Add(new Santral()
+                {
+                    UnitId = injectionUnit.UnitId,
+                    Eic = injectionUnit.EIC,
+                    UnitName = injectionUnit.Name,
+                    OrganizationETSOCode = injectionUnit.OrganizationETSOCode,
+                    SantralTipi = (SantralTipi)santralTipiValue,
+                    ValueList = ValueList
+                });
+                await AddRangeAsync(santralList);
+                await _context.SaveChangesAsync();
+                #endregion
+                return santralList;
             }
 
-            santral.SantralTipi = (SantralTipi)santralTipiValue;
-            _context.SaveChanges();
+            if (((int)santral.SantralTipi) == 0)
+            {
+                santral.SantralTipi = (SantralTipi)santralTipiValue;
+                _context.SaveChanges();
+            }
+            santral.ValueList = ValueList;
+            santralList.Add(santral);
+            return santralList;
         }
-
     }
 }
